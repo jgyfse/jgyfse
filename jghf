@@ -1,0 +1,38 @@
+CREATE TABLE "public"."biz_geographic_name" (
+  "pk_id" int8 NOT NULL,
+  "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
+  "pinyin" varchar(255) COLLATE "pg_catalog"."default",
+  "classz" varchar(4) COLLATE "pg_catalog"."default",
+  "bz" varchar(100) COLLATE "pg_catalog"."default",
+  "slx" varchar(20) COLLATE "pg_catalog"."default",
+  "geom" "public"."geometry" NOT NULL,
+  CONSTRAINT "pk_biz_geographic_name" PRIMARY KEY ("pk_id")
+)
+;
+ 
+ALTER TABLE "public"."biz_geographic_name" 
+  OWNER TO "ghy01";
+ 
+CREATE INDEX "idex_biz_geographic_name_classz" ON "public"."biz_geographic_name" USING btree (
+  "classz" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+ 
+CREATE INDEX "idx_biz_geographic_name_geom" ON "public"."biz_geographic_name" USING gist (
+  "geom" "public"."gist_geometry_ops_2d"
+);
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."pk_id" IS '主键id';
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."name" IS '地名';
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."pinyin" IS '汉语拼音';
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."classz" IS 'classz';
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."bz" IS '备注';
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."slx" IS 'slx';
+ 
+COMMENT ON COLUMN "public"."biz_geographic_name"."geom" IS '空间对象';
+ 
+COMMENT ON TABLE "public"."biz_geographic_name" IS '地名基础信息表，用于存储中国范围内的地名信息';
