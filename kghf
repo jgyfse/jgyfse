@@ -1,0 +1,79 @@
+
+    public Course findCourse_teacher(String cteacher) {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        String sql = "select *from course where cteacher='" +cteacher + "'";
+        Course c = null;
+        DBConn db = new DBConn();
+        conn = db.getConn();
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                c = new Course();
+                c.setCno(rs.getString("cno"));
+                c.setCname(rs.getString("cname"));
+                c.setCteacher(rs.getString("cteacher"));
+                c.setCtype(rs.getString("ctype"));
+                c.setCplace(rs.getString("cplace"));
+                c.setCtime(rs.getString("ctime"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+        }
+        catch (SQLException ex3) {
+            ex3.printStackTrace();
+        }
+        return c;
+    }
+  
+    public Vector selectCourse() {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        DBConn db = new DBConn();
+        conn = db.getConn();
+        String sql = "select cname from course";
+        Vector v = new Vector();
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                v.add(rs.getString("cname"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception em) {
+            em.printStackTrace();
+            System.out.println("sql有错");
+        }
+        return v;
+    }
+
+    public Vector selectCourse2() {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        DBConn db = new DBConn();
+        conn = db.getConn();
+        String sql = "select cteacher from course";
+        Vector v = new Vector();
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                v.add(rs.getString("cteacher"));
+            }
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (Exception em) {
+            em.printStackTrace();
+            System.out.println("sql有错");
+        }
+        return v;
+    }
+
