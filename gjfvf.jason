@@ -1,0 +1,60 @@
+{
+  "pages": [
+    "pages/logs/logs",
+    "pages/index/index",
+    "pages/cash/cash",
+    "pages/own/own",
+    "pages/gou/gou",
+    "pages/qin/qin",
+    "pages/users/users", 
+    "pages/won/won",
+    "pages/address/address",
+    "pages/logistics/logistics",
+    "pages/addressAdd/addressAdd",
+   "pages/welfare/welfare",
+   "pages/order/order",
+   "pages/lszz/lszz",
+   "pages/xyxh/xyxh",
+   "pages/fl/fl",
+   "pages/collection/collection",
+    "pages/map/map"
+   
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FF0000",
+    "navigationBarTitleText": "花语轩",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "selectedColor": "#D73E3E",
+    "backgroundColor": "#F3F1EF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "/images/bar/home-off.png",
+        "selectedIconPath": "images/bar/home-on.png"
+      },
+      {
+        "pagePath": "pages/cash/cash",
+        "text": "分类",
+        "iconPath": "images/bar/tab_group.png",
+        "selectedIconPath": "images/bar/tab_group 2.png"
+      },
+      {
+        "pagePath": "pages/gou/gou",
+        "text": "购物车",
+        "iconPath": "images/bar/cart-off.png",
+        "selectedIconPath": "images/bar/cart-on.png"
+      },
+      {
+        "pagePath": "pages/own/own",
+        "text": "我",
+        "iconPath": "images/bar/my-off.png",
+        "selectedIconPath": "images/bar/my-on.png"
+      }
+    ]
+  }
+}
