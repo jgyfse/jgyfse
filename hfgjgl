@@ -1,0 +1,180 @@
+# In[1]:
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pyecharts.charts import Pie, Bar, Line, WordCloud
+from pyecharts import options as opts
+from pyecharts.globals import ThemeType
+import collections
+import warnings
+ 
+plt.rcParams['font.sans-serif'] = ['SimHei']  #解决中文显示
+plt.rcParams['axes.unicode_minus'] = False  #解决符号无法显示
+ 
+# 忽略警告信息
+warnings.filterwarnings('ignore')
+ 
+# In[2]:
+# 读取电影数据集
+data = pd.read_csv('./movies.csv')
+ 
+# In[3]:
+# 删除缺失值和重复行
+data.dropna(inplace=True)
+data.drop_duplicates(inplace=True)
+ 
+# In[4]:
+# 对数据集进行预处理
+data['Video_Name_CN'] = data['Video_Name_CN'].apply(
+    lambda x: x.split('/')[0])  # 处理Video_Name_CN
+data['Video_Name'] = data['Video_Name'].apply(
+    lambda x: x.split('/')[0])  # 处理Video_Name
+data['Video_Address'] = data['Video_Address'].apply(
+    lambda x: x.split('/')[0].split(',')[0].strip())  # 处理Video_Address
+data['Video_Language'] = data['Video_Language'].apply(
+    lambda x: x.split('/')[0].split(',')[0])  # 处理Video_Language
+data['Video_Date'] = data['Video_Date'].apply(
+    lambda x: x.split('(')[0].strip())  # 处理Video_Date
+data['Year'] = data['Video_Date'].apply(lambda x: x.split('-')[0])  # 提取年份信息
+data = data[data['Year'] >= '2016']  # 只保留2016年及以后的电影数据
+data['Num_of_Users'] = data['Video_Number'].apply(lambda x: str(x).split(
+    'from')[-1].split('users')[0].replace(',', '').strip())  # 处理Num_of_Users
+data['Num_of_Users'] = pd.to_numeric(data['Num_of_Users'],
+                                     errors='coerce')  # 将Num_of_Users列转换为数值类型
+data['Video_Number'] = data['Video_Number'].apply(
+    lambda x: x.split('/')[0].strip())  # 处理Video_Number
+data['Video_Number'] = pd.to_numeric(data['Video_Number'],
+                                     errors='coerce')  # 将Video_Number列转换为数值类型
+data['Video_Time'] = data['Video_Time'].apply(
+    lambda x: x.split('分钟')[0])  # 处理Video_Time
+data['Video_Time'] = pd.to_numeric(data['Video_Time'],
+                                   errors='coerce')  # 将Video_Time列转换为数值类型
+data['Video_Director'] = data['Video_Director'].apply(
+    lambda x: x.split()[0])  # 处理Video_Director
+data.dropna(inplace=True)  # 再次删除缺失值
+ 
+# In[5]:
+# 分析各个国家发布的电影数量占比
+df1 = data.groupby('Video_Address').size().sort_values(
+    ascending=False).head(10)
+pie1 = Pie(init_opts=opts.InitOpts(theme=ThemeType.LIGHT))
+pie1.add(
+    series_name='电影数量',
+    data_pair=[list(z) for z in zip(df1.index.tolist(), df1.values.tolist())],
+    radius='70%',
+)
+pie1.set_series_opts(tooltip_opts=opts.TooltipOpts(trigger='item'))
+pie1.render_notebook()
+ 
+# In[6]:
+# 发布电影数量最高Top5导演
+df2 = data['Video_Director'].value_counts().head()
+bar1 = Bar(init_opts=opts.InitOpts(theme=ThemeType.DARK))
+bar1.add_xaxis(df2.index.tolist())
+bar1.add_yaxis('电影数量', df2.values.tolist())
+bar1.set_series_opts(itemstyle_opts=opts.ItemStyleOpts(color='#B87333'))
+bar1.set_series_opts(label_opts=opts.LabelOpts(position="top"))
+bar1.render_notebook()
+ 
+# In[7]:
+# 分析电影平均评分最高的前十名国家
+df3 = data.groupby('Video_Address')['Video_Number'].mean().sort_values(
+    ascending=False).head(10)
+ 
+# 创建水平条形图
+def create_barh_chart(x_data, y_data):
+    ax = x_data.plot(kind='barh', color='#6495ED')
+    ax.set_xlabel('平均评分')
+    ax.set_ylabel('国家')
+    ax.invert_yaxis()
+    for i, v in enumerate(y_data):
+        ax.text(v + 0.1, i - 0.15, str(round(v, 2)))
+    return ax
+ 
+# 生成水平条形图
+ax = create_barh_chart(df3, df3.values)
+plt.show()
+ 
+# In[8]:
+# 分析哪种语言最受欢迎
+result_list = []
+for i in data['Video_Language'].values:
+    word_list = str(i).split('/')
+    for j in word_list:
+        result_list.append(j)
+word_counts = collections.Counter(result_list)
+word_counts_top = word_counts.most_common(100)
+wc1 = WordCloud()
+wc1.add('', word_counts_top)
+wc1.render_notebook()
+ 
+# In[9]:
+# 分析哪种类型电影最受欢迎
+result_list = []
+for i in data['Video_Type'].values:
+    result_list.extend(str(i).split('/'))
+word_counts = collections.Counter(result_list)
+word_counts_top = word_counts.most_common(100)
+wc2 = WordCloud()
+wc2.add('', word_counts_top)
+wc2.render_notebook()
+ 
+# In[10]:
+# 分析各种类型电影的比例
+word_counts_top = word_counts.most_common(10)
+pie2 = Pie(init_opts=opts.InitOpts(theme=ThemeType.MACARONS))
+pie2.add(series_name='类型',
+         data_pair=word_counts_top,
+         rosetype='radius',
+         radius='60%')
+pie2.set_global_opts(title_opts=opts.TitleOpts(
+    title="各种类型电影的比例", pos_left='center', pos_top=50))
+pie2.set_series_opts(tooltip_opts=opts.TooltipOpts(
+    trigger='item', formatter='{a} <br/>{b}:{c} ({d}%)'))
+pie2.render_notebook()
+ 
+# In[11]:
+# 分析电影片长的分布
+sns.displot(data['Video_Time'], kde=True)
+plt.show()
+ 
+# In[12]:
+# 分析片长和评分的关系
+plt.scatter(data['Video_Time'], data['Video_Number'])
+plt.title('片长和评分的关系', fontsize=15)
+plt.xlabel('片长', fontsize=15)
+plt.ylabel('评分', fontsize=15)
+plt.show()
+ 
+# In[13]:
+# 统计2016年到至今的电影年产量
+df4 = data.groupby('Year').size()
+line = Line()
+line.add_xaxis(xaxis_data=df4.index.to_list())
+line.add_yaxis('年产量', y_axis=df4.values.tolist(), is_smooth=True)
+line.set_global_opts(
+    xaxis_opts=opts.AxisOpts(splitline_opts=opts.SplitLineOpts(is_show=True)),
+    title_opts=opts.TitleOpts(title="2016年到至今的电影年产量",
+                              pos_left='center',
+                              pos_bottom='5%'))
+line.render_notebook()
+ 
+# In[14]:
+# 各个评分段占据总体的比例
+bins = [0, 3, 5, 7, 8, 9, 10]
+labels = ['0-3分', '3-5分', '5-7分', '7-8分', '8-9分', '9-10分']
+data['score_range'] = pd.cut(data['Video_Number'],
+                             bins=bins,
+                             labels=labels,
+                             include_lowest=True)
+df5 = data.groupby('score_range').size()
+pie3 = Pie(init_opts=opts.InitOpts(theme=ThemeType.LIGHT))
+pie3.add(
+    series_name='评分比例',
+    data_pair=[list(z) for z in zip(df5.index.tolist(), df5.values.tolist())],
+    radius=['70%', '30%'])
+pie3.set_global_opts(title_opts=opts.TitleOpts(
+    title="各个评分段占据总体的比例", pos_left='center', pos_top='5%'))
+pie3.set_series_opts(tooltip_opts=opts.TooltipOpts(trigger='item'))
+pie3.set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}\n({d}%)"))
+pie3.render_notebook()
